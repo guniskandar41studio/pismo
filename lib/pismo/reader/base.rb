@@ -48,6 +48,7 @@ module Pismo
         @content = {}
         
         if RUBY_VERSION > "1.9"
+          @raw_content = @raw_content.tidy_bytes
           @raw_content.encode!("UTF-8", :invalid => :replace, :replace => '?') if @raw_content.encoding != "UTF-8"
           @raw_content.encode!("ASCII-8BIT", :invalid => :replace, :replace => '?') if !@raw_content.valid_encoding?
         end

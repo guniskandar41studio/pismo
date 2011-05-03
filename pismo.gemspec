@@ -28,4 +28,5 @@ Gem::Specification.new do |s|
   s.add_dependency(%q<sanitize>, [">= 0"])
   s.add_dependency(%q<fast-stemmer>, [">= 0"])
   s.add_dependency(%q<chronic>, [">= 0"])
+  s.add_dependency(%q<utf8_utils>, [">= 0"])
 end
