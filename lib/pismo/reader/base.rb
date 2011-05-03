@@ -153,12 +153,12 @@ module Pismo
           #  end
           #end
 
-          if el.text && el.text.tidy_bytes.strip.length < 3 && !%w{img}.include?(el.name) && el.tidy_bytes.inner_html !~ /\<img/
+          if el.text && el.text.tidy_bytes.strip.length < 3 && !%w{img}.include?(el.name) && el.inner_html.tidy_bytes !~ /\<img/
             el.remove
             next
           end
 
-          if el.tidy_bytes.name == "p" && el.tidy_bytes.text !~ /(\.|\?|\!|\"|\')(\s|$)/ && el.tidy_bytes.inner_html !~ /\<img/
+          if el.name.tidy_bytes == "p" && el.text.tidy_bytes !~ /(\.|\?|\!|\"|\')(\s|$)/ && el.inner_html.tidy_bytes !~ /\<img/
             el.remove
             next
           end
