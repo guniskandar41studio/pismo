@@ -87,7 +87,7 @@ module Pismo
         @doc.css("div, span, table, tr, td, pre").each do |el|
           # Any block elements with no child block elements can become paragraphs
           if (BLOCK_OUTPUT_ELEMENTS & el.inner_html.tidy_bytes.scan(/\<(\w+)/).flatten).empty?
-            el.name.tidy_bytes = "p"
+            el.name = "p"
           elsif el.name != "span"
             el.name = "div"
           end
