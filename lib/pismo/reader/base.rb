@@ -117,12 +117,12 @@ module Pismo
         content_branch.css('*').each_with_index do |el, i|
           next unless el
 
-          if el.name == "h1"
+          if el.name.tidy_bytes == "h1"
             el.remove
             next
           end
 
-          if el.name == "h2" && content_branch.inner_html.scan('<h2').size == 1
+          if el.name.tidy_bytes == "h2" && content_branch.inner_html.tidy_bytes.scan('<h2').size == 1
             el.remove
           end
 
@@ -153,18 +153,18 @@ module Pismo
           #  end
           #end
 
-          if el.text && el.text.strip.length < 3 && !%w{img}.include?(el.name) && el.inner_html !~ /\<img/
+          if el.text && el.text.tidy_bytes.strip.length < 3 && !%w{img}.include?(el.name) && el.tidy_bytes.inner_html !~ /\<img/
             el.remove
             next
           end
 
-          if el.name == "p" && el.text !~ /(\.|\?|\!|\"|\')(\s|$)/ && el.inner_html !~ /\<img/
+          if el.tidy_bytes.name == "p" && el.tidy_bytes.text !~ /(\.|\?|\!|\"|\')(\s|$)/ && el.tidy_bytes.inner_html !~ /\<img/
             el.remove
             next
           end
 
           # If the ID or class of the element contains a fatally bad word, get rid of it
-          if (BAD_WORDS & (el['id'].to_s + ' ' + el['class'].to_s).downcase.scan(/[a-z]+/)).length > 0
+          if (BAD_WORDS & (el['id'].to_s + ' ' + el['class'].to_s).tidy_bytes.downcase.scan(/[a-z]+/)).length > 0
             #puts "Removing #{el.name} #{el['id']} #{el['class']} BAD"
             el.remove
             next
@@ -176,6 +176,8 @@ module Pismo
 
         # Clean up the HTML again - Nokogiri outputs it with full doctype and crap
         clean_html = strip(Sanitize.clean(content_branch.to_html, :elements => (clean ? BLOCK_OUTPUT_ELEMENTS : OUTPUT_ELEMENTS), :attributes => (clean ? OK_CLEAN_ATTRIBUTES : OK_ATTRIBUTES)))
+
+        clean_html = clean_html.tidy_bytes
 
         # If the content is desired as "clean" (i.e. plain-text), do some quick fix-ups
         if clean
@@ -211,27 +213,27 @@ module Pismo
         clean_content = Sanitize.clean(content, :elements => NON_HEADER_ELEMENTS, :attributes => OK_CLEAN_ATTRIBUTES, :remove_contents => %w{h1 h2 h3 h4 h5 h6})
 
         fodder = ''
-        doc = Nokogiri::HTML(clean_content, nil, 'utf-8')
+        doc = Nokogiri::HTML(clean_content.tidy_bytes, nil, 'utf-8')
 
         doc.traverse do |el|
-          path_segments = el.path.scan(/[a-z]+/)[2..-1]
+          path_segments = el.path.tidy_bytes.scan(/[a-z]+/)[2..-1]
           next unless path_segments && path_segments.length > 1
-          if el.text? && el.text.strip.length < 3
+          if el.text? && el.text.tidy_bytes.strip.length < 3
             el.remove
             next
           end
           if el.text? && NON_HEADER_ELEMENTS.include?(path_segments[-2])
-            text = el.text.strip
+            text = el.text.tidy_bytes.strip
             text += "." if text !~ /[\.\!\?\"\']$/
             fodder += text + "\n"
           end
         end
 
         fodder = content(true) if fodder.to_s.length < 50
-        fodder.gsub!(/\b\w\W\s/, '')
+        fodder.tidy_bytes.gsub!(/\b\w\W\s/, '')
 
         #sentences = fodder.scan(/([\&\w\s\-\'\,\+\.\/\\\:\#\(\)\=\"\?\!]+?[\.\?\!])(\s|\Z)/im).map { |s| s.first }
-        sentences = fodder.scan(/(.+?[\.\?\!])(\s|\Z)/im).map { |s| s.first.strip }
+        sentences = fodder.tidy_bytes.scan(/(.+?[\.\?\!])(\s|\Z)/im).map { |s| s.first.strip }
 
         sentences.compact!
         sentences.map! { |s| s.strip }
